@@ -1,3 +1,7 @@
+
+# genome caches
+genomes
+
 dist/
 .python-version
 parts/
