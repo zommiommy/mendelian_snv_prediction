@@ -4,31 +4,35 @@ git:
   depth: false
 addons:
   sonarcloud:
-    organization: "zommiommy-github"
+    organization: zommiommy-github
     token:
       secure: nGFNkx2RiwZSQBoV2kVReaE5007f9v/68mOkfG4kC+rd7QxA8Xi9GsV0is/QJiFcEZRwE8L9Jy16ecX+AybF/4b28OQ9zRBqj+U0ZdfSguetZj+BzQOn8dKmp9a1P+zqTUUGS8DdxLJkDJEnLJTpMDtvpfbF4nVF7cqYR/1QBO8BhmKMkb9NoSqbMbpZJEcFdUDHLya7jgXQ3kA7V6/eF2O8Ne/Le79rnrgar20+rZChxQ4IdBYMqsCoLRiDEuQrksZVGP919gamf6idWwlzI6Corm82CCKJNcolxStdv7FW+rYJCDH0ln2lfxFsrcGzwDuN2VKHcKoBpA3m44xLXMAX8hd8oiRmSuZ40Il3bt9bUDSsm0kURDabEQLbsHxWDEW3HDClYgWuo/dOtchhdq+BmT5cOwYBAChnJi6mbdxswy0gsvOwSstbbVC11FEEnZW0+qEYs9LeauzMgYNYYbkVpPJj4Poslr1cr5bJ57I9e528Fi87juByEI+2x/banOylUzdXwzXVEWalOnVNYeDRD1oebPsGNrZrAmlpz1iSTr/sCHB7yw6n2W7wSXBlTp9CUS1At/QHLb6AK600tlxj+IsTadnBbqqzUcBrlFnEhpudi6ZsGgZiXkq4JtFWN4Gj5jr5d7KxKjFjD/5dpa1HUWlE140nxFPHrRPdkKY=
 language: python
 python:
 - '3.8'
 before_install:
-  - pip install --upgrade pytest
+- pip install --upgrade pytest
 install:
 - pip install .[test]
 before_script:
-  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  - chmod +x ./cc-test-reporter
-  - ./cc-test-reporter before-build
+- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+  > ./cc-test-reporter
+- chmod +x ./cc-test-reporter
+- "./cc-test-reporter before-build"
 after_script:
-  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+- "./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT"
 script:
 - rm -rf .coverage
 - coverage erase
-- pytest --cov=mendelian_snv_prediction --cov-report xml:coverage.xml 
+- pytest --cov=mendelian_snv_prediction --cov-report xml:coverage.xml
 - coverage combine --append || true
 - coverage report
 - coverage xml
-- 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then sonar-scanner; fi' # sonar only on non-PRs
-
+- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then sonar-scanner; fi
 after_success:
-  - coveralls
-  - python-codacy-coverage -r coverage.xml
+- coveralls
+- python-codacy-coverage -r coverage.xml
+env:
+  global:
+  - secure: I23sOW3LEFjM23UqSQTuYCLYn5Dz7bUYbJyff9aeC4mCA5OEwF2qCgtmo9/Adm6IvtU7lefbA6FJSDBqGVcTg9kBAnIxWBltfCNTN+y0b+46vZ7cH8Taxz3UxOVw8lI2kxSU4Jd0q8SumM9VFOX//Wp0W1wkDYavfziYkE+FhBkMSogb5gQ2cc2+z3zzKkFaVLgjJMDs/Lqes5edFRTogqhT0EJ8VxZC5ycxPeGTtSd6L63bWBj3RtFLkBZ3DN/jCCstbV+GVfaTf06Uja58f5v9Cipip4WAGlU9cjZFjzf9RM9PPO8lf9fhi8iDKKmebpXVotM0IaI33MdqlECa8RxQwn9iGBSYskEfUyP4kXktQUIMCzx3M7gpMbBDv7jqV9V1AKqzaCKRTfX1NVHcgBnUK2NqsgFfqOrHNCiya7I7qP6kcQEV8V59PnzWOZIqCh+XtneOVqkWDG54ieXSqMnZckgMleyhs29otUJvF4YmroxNCrK2n6WPNmv2lJD1QoEDJeclJu/iVILTNbtrxgXX95kVbSkzA1M3zyirORmsMjpHaU/TLWP+FLBsuAS8fRvuycuq4h31iWukfmuY26xZ0YUWfXio7oPLc1zgkPL3scWnt4VIW4iLR38QICOwAb4rNTlzHjVRvHGLZX5KFQQfeUA+w206bRW9Fyua2aM=
+  - secure: HjGrvp6n3RCYOOSQaDhp+Mqx27Eni9YQpjbcTQ8fmps5TRwgpT6bU+EJ9R10GBt6cQyuc5AD45BhNuMINviEMoUxxZL0rr9FE6CVFL9qwPIQf0qUxvIyP7fgaeHpR7xAdkTL0ak1NIfSt3/81jZcYYw3yN254eNeq4CECMfYQR7r+Y8RD/ob9CWGhkGCTodW1+QqimZTG1C3wFZ44dsgIoq07EhZQIvuWJ4s3DDSE2VE8duS3b8Gx8+2c/Ib1Pyumop8zJKMxwrZVnLGqTlvRMdcUVE3WqDSxxrV2Pc4gBjElWVoUMiWsv/hKlmmeYHGMQI4ZMwJDxv90IXe35qB5mOPGwkjWz+CL2Nftk3KjFaE14nOFQUaC9sl0xSL1ho2VdjBvlLr5vciMiL6uS4nTCdTD7XNkjsoMqqiikgnKizuFdiKUYfz/vabFE2jtKpkTAKlhAeJoA0drCRBHS9AIXZ6z1PskldBR3CqXhx7cJroQLXYX7kgnJx3faeKGO7Bqt6HtrD1TtXHA91saZjW5a8seEHozPaTuh286A5wOAdH2XPpmPMZpOH+yoFNPSPoIDRuXk8YHywAsAmYPFs9p+tTl5GocB0CLCkY+W1HWchwpeJMtFK939hiamtLq4BlagpO+tKKutF8LfTUFaKBejcEUJZnTwF/XS+Sox7o+TI=
