@@ -1,6 +1,5 @@
 
 from mendelian_snv_prediction import get_data, get_model
-import os
 
 
 def run(path):
@@ -11,10 +10,10 @@ def run(path):
         head_threshold=1e5,
         seed=1337
     )
-    
+
     model = get_model()
     model.summary()
-    history = model.fit_generator(
+    model.fit_generator(
         generator=train,
         steps_per_epoch=train.steps_per_epoch,
         validation_data=test,
@@ -23,7 +22,8 @@ def run(path):
         verbose=1,
         use_multiprocessing=False,
         shuffle=True
-    ).history
+    )
+
 
 if __name__ == "__main__":
     run("./mendelian_snv.csv.gz")

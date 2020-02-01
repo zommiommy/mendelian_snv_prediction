@@ -1,7 +1,7 @@
 
 import os
 from mendelian_snv_prediction import get_data, get_model
-from holdouts_generator import holdouts_generator, balanced_random_holdouts
+
 
 def test_run():
     pwd = os.path.dirname(os.path.abspath(__file__))
@@ -13,11 +13,11 @@ def test_run():
         head_threshold=1e5,
         seed=1337
     )
-    
+
     model = get_model()
     model.summary()
 
-    history = model.fit_generator(
+    model.fit_generator(
         generator=train,
         steps_per_epoch=train.steps_per_epoch,
         validation_data=test,
@@ -26,4 +26,4 @@ def test_run():
         verbose=1,
         use_multiprocessing=False,
         shuffle=True
-    ).history
+    )
