@@ -1,6 +1,7 @@
 
 # genome caches
 genomes
+htmlcov
 
 dist/
 .python-version

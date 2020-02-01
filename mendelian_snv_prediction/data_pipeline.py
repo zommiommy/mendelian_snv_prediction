@@ -18,7 +18,6 @@ def wiggle(training):
     positives = x[y==1]
     x = pd.concat([x, wiggle_bed_regions(positives, 150, 10, seed=42)], axis=0)
     y = x.labels.values
-    print(x.shape, y.shape)
     return create_sequence(x, y)
 
 def split_train_test(bed, split_ratio=0.3):
@@ -50,5 +49,5 @@ def get_data(
     training, testing = split_train_test(bed)
     train = wiggle(training)
     test = create_sequence(*testing)
-    
+
     return train, test
