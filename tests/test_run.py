@@ -10,7 +10,7 @@ def test_run():
         pwd + "/../mendelian_snv.csv.gz",
         assembly="hg19",
         batchsize=128,
-        head_threshold=1e5,
+        head_threshold=1e3,
         seed=1337
     )
 
