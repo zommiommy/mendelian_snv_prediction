@@ -3,7 +3,33 @@ import pandas as pd
 from keras_bed_sequence import BedSequence
 from keras_mixed_sequence import MixedSequence
 from ucsc_genomes_downloader.utils import wiggle_bed_regions
+from holdouts_generator import holdouts_generator, balanced_random_holdouts
 
+def create_sequence(bed, y, assembly="hg19", batchsize=128):
+    X = BedSequence(
+        assembly=assembly,
+        bed=bed,
+        batch_size=batchsize
+    )
+    return MixedSequence(X, y, batchsize)
+
+def wiggle(training):
+    x, y = training
+    positives = x[y==1]
+    x = pd.concat([x, wiggle_bed_regions(positives, 150, 10, seed=42)], axis=0)
+    y = x.labels.values
+    print(x.shape, y.shape)
+    return create_sequence(x, y)
+
+def split_train_test(bed, split_ratio=0.3):
+    generator = holdouts_generator(
+        bed, bed.labels,
+        holdouts=balanced_random_holdouts(
+            [split_ratio],
+            [1]
+        )
+    )
+    return next(generator())[0]
 
 def get_data(
     path: str,
@@ -12,40 +38,17 @@ def get_data(
     head_threshold: int = 1e5,
     seed : int = 1337
 ):
-
-
-
     # Load the bed fil
     df = pd.read_csv(path)
 
     # take a subsection of the dataset
     if head_threshold:
-        train_bed = df.head(int(head_threshold))
+        bed = df.head(int(head_threshold))
     else:
-        train_bed = df
+        bed = df
 
-    # Get all the positives
-    positives = train_bed[train_bed.labels == 1]
-
-    # WARNING
-    # "Generate" more positives by offsetting the windows by a random value
-    multiplied_positives = wiggle_bed_regions(positives, 150, 10, seed)
-
-    # Generate the data for the assembly
-    X = BedSequence(
-        assembly=assembly,
-        bed=train_bed,
-        batch_size=batchsize
-    )
-
-    # Get the labels and covert them to float
-    # becasue keras fit function break on int labels
-    # with the custom loss
-    y = train_bed.labels.values
-    y = y.astype(float)
-
-    # Merge the data into a sequence
-    mixed = MixedSequence(X, y, 128)
-    # Shuffle the data
-    mixed.on_epoch_end()
-    return mixed
+    training, testing = split_train_test(bed)
+    train = wiggle(training)
+    test = create_sequence(*testing)
+    
+    return train, test

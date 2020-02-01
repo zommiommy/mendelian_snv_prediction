@@ -5,7 +5,7 @@ install:
 	$(PYTHON_PATH)pip install --user --upgrade .
 
 test:
-	$(PYTHON_PATH)pytest -s --cov genome_windows_generator --cov-report html
+	$(PYTHON_PATH)pytest -s --cov mendelian_snv_prediction --cov-report html
 
 build:
 	$(PYTHON_PATH)python setup.py sdist
