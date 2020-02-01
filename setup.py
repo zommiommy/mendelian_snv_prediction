@@ -61,7 +61,8 @@ setup(
     # Add here the package dependencies
     install_requires=[
         "keras_mixed_sequence",
-        "keras_bed_sequence"
+        "keras_bed_sequence",
+        "ucsc_genomes_downloader"
     ],
     extras_require=extras,
 )

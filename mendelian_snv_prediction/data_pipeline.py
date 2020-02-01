@@ -2,14 +2,18 @@ import numpy as np
 import pandas as pd
 from keras_bed_sequence import BedSequence
 from keras_mixed_sequence import MixedSequence
+from ucsc_genomes_downloader.utils import wiggle_bed_regions
 
 
 def get_data(
     path: str,
     assembly: str = "hg19",
     batchsize: int = 128,
-    head_threshold: int = 1e5
+    head_threshold: int = 1e5,
+    seed : int = 1337
 ):
+
+
 
     # Load the bed fil
     df = pd.read_csv(path)
@@ -19,6 +23,13 @@ def get_data(
         train_bed = df.head(int(head_threshold))
     else:
         train_bed = df
+
+    # Get all the positives
+    positives = train_bed[train_bed.labels == 1]
+
+    # WARNING
+    # "Generate" more positives by offsetting the windows by a random value
+    multiplied_positives = wiggle_bed_regions(positives, 150, 10, seed)
 
     # Generate the data for the assembly
     X = BedSequence(
