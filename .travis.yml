@@ -28,7 +28,7 @@ after_script:
 script:
 - rm -rf .coverage
 - coverage erase
-- pytest --cov=mendelian_snv_prediction --cov-report xml:coverage.xml
+- pytest -s --cov=mendelian_snv_prediction --cov-report xml:coverage.xml
 - coverage combine --append || true
 - coverage report
 - coverage xml
