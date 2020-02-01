@@ -63,7 +63,8 @@ setup(
     install_requires=[
         "keras_mixed_sequence",
         "keras_bed_sequence",
-        "ucsc_genomes_downloader"
+        "ucsc_genomes_downloader",
+        "holdouts_generator"
     ],
     extras_require=extras,
 )
