@@ -2,7 +2,7 @@ import tensorflow as tf
 import tensorflow.keras as k
 
 
-def balanced_binary_crossentropy(weight=1.0):
+def balanced_binary_crossentropy(true_weight=1.0):
     def loss(y_true, y_pred):
         mask = y_true == 1
         nmask = ~mask
@@ -21,5 +21,5 @@ def balanced_binary_crossentropy(weight=1.0):
             name=None
         )
 
-        return l0 + weight * l1
+        return l0 + true_weight * l1
     return loss

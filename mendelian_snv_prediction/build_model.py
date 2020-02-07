@@ -2,6 +2,7 @@
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Input, Reshape
 from tensorflow.keras.layers import Dense, Conv2D, MaxPool2D, Flatten
+from tensorflow.keras.metrics import AUC
 
 from .utils import balanced_binary_crossentropy
 
@@ -22,16 +23,16 @@ def build_model(x, filters, kernels, pools, dense):
     return x
 
 
-def get_model():
-    filters = [128, 64, 64, 32]
-    kernels = [(9, 4), (6, 2), (3, 1), (3, 1)]
-    pools = [(3, 1), (2, 1), (2, 2), (2, 2)]
-    dense = [256, 64, 32]
+def get_model(windows_size=200, balancing_loss_weigth=10):
+    filters = [128, 64, 64, 32, 32]
+    kernels = [(9, 4), (6, 2), (3, 1), (3, 1), (3, 1)]
+    pools = [(3, 1), (2, 1), (2, 2), (2, 2), (2, 1)]
+    dense = [128, 64, 64, 32]
 
     i = Input(
-        shape=(500, 4)
+        shape=(windows_size, 4)
     )
-    x = Reshape((500, 4, 1))(i)
+    x = Reshape((windows_size, 4, 1))(i)
     classifier = Model(
         inputs=i,
         outputs=build_model(
@@ -45,6 +46,10 @@ def get_model():
 
     classifier.compile(
         optimizer="nadam",
-        loss=balanced_binary_crossentropy(2.0)
+        loss=balanced_binary_crossentropy(balancing_loss_weigth),
+        metrics=[
+            "binary_accuracy",
+            AUC(curve='PR')
+        ]
     )
     return classifier

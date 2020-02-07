@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 from keras_bed_sequence import BedSequence
 from keras_mixed_sequence import MixedSequence
@@ -13,10 +12,10 @@ def create_sequence(bed, y, assembly="hg19", batchsize=128):
     )
     return MixedSequence(X, y, batchsize)
 
-def wiggle(training):
+def wiggle(training, max_wiggle_size=150, wiggles=10, seed=42):
     x, y = training
     positives = x[y==1]
-    x = pd.concat([x, wiggle_bed_regions(positives, 150, 10, seed=42)], axis=0)
+    x = pd.concat([x, wiggle_bed_regions(positives, max_wiggle_size, wiggles, seed=seed)], axis=0)
     y = x.labels.values
     return create_sequence(x, y)
 
@@ -35,10 +34,14 @@ def get_data(
     assembly: str = "hg19",
     batchsize: int = 128,
     head_threshold: int = 1e5,
+    max_wiggle_size=150, 
+    wiggles=10,
     seed : int = 1337
 ):
     # Load the bed fil
     df = pd.read_csv(path)
+
+    print(1 - df.head(int(head_threshold)).labels.mean())
 
     # take a subsection of the dataset
     if head_threshold:
@@ -47,7 +50,7 @@ def get_data(
         bed = df
 
     training, testing = split_train_test(bed)
-    train = wiggle(training)
+    train = wiggle(training, max_wiggle_size, wiggles)
     test = create_sequence(*testing)
 
     return train, test
