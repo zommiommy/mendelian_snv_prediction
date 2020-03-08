@@ -1,56 +1,51 @@
 import pandas as pd
+import os
 from keras_bed_sequence import BedSequence
 from keras_mixed_sequence import MixedSequence
 from ucsc_genomes_downloader.utils import wiggle_bed_regions
-from holdouts_generator import holdouts_generator, balanced_random_holdouts
+from ucsc_genomes_downloader import Genome
+from sklearn.model_selection import StratifiedShuffleSplit
 
-def create_sequence(bed, y, assembly="hg19", batchsize=128):
-    X = BedSequence(
-        assembly=assembly,
-        bed=bed,
-        batch_size=batchsize
+
+def create_sequence(bed, assembly, batchsize):
+    return MixedSequence(
+        BedSequence(
+            assembly=assembly,
+            bed=bed,
+            batch_size=batchsize
+        ),
+        bed.labels,
+        batchsize
     )
-    return MixedSequence(X, y, batchsize)
 
-def wiggle(training, max_wiggle_size=150, wiggles=10, seed=42):
-    x, y = training
-    positives = x[y==1]
-    x = pd.concat([x, wiggle_bed_regions(positives, max_wiggle_size, wiggles, seed=seed)], axis=0)
-    y = x.labels.values
-    return create_sequence(x, y)
-
-def split_train_test(bed, split_ratio=0.3):
-    generator = holdouts_generator(
-        bed, bed.labels,
-        holdouts=balanced_random_holdouts(
-            [split_ratio],
-            [1]
-        )
-    )
-    return next(generator())[0]
 
 def get_data(
-    path: str,
-    assembly: str = "hg19",
     batchsize: int = 128,
     head_threshold: int = 1e5,
-    max_wiggle_size=150, 
+    max_wiggle_size=150,
     wiggles=10,
-    seed : int = 1337
+    seed=42
 ):
-    # Load the bed fil
-    df = pd.read_csv(path)
+    # Load the bed file
+    df = pd.read_csv(
+        "{}/mendelian_snv.csv.gz".format(
+            os.path.dirname(os.path.abspath(__file__))
+        )
+    )
 
-    print(1 - df.head(int(head_threshold)).labels.mean())
+    train, test = next(
+        StratifiedShuffleSplit(
+            n_splits=1,
+            test_size=0.3
+        ).split(df, df.labels))
+        
+    train_df = df.iloc[train]
+    test_df = df.iloc[test]
+    train_df = wiggle_bed_regions(train_df, max_wiggle_size, wiggles, seed)
 
-    # take a subsection of the dataset
-    if head_threshold:
-        bed = df.head(int(head_threshold))
-    else:
-        bed = df
+    assembly = Genome("hg19")
 
-    training, testing = split_train_test(bed)
-    train = wiggle(training, max_wiggle_size, wiggles)
-    test = create_sequence(*testing)
-
-    return train, test
+    return (
+        create_sequence(train_df, assembly, batchsize),
+        create_sequence(test_df, assembly, batchsize)
+    )

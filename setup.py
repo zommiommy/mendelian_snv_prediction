@@ -64,7 +64,7 @@ setup(
         "keras_mixed_sequence",
         "keras_bed_sequence",
         "ucsc_genomes_downloader",
-        "holdouts_generator"
+        "sklearn"
     ],
     extras_require=extras,
 )
