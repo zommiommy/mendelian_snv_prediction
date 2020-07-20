@@ -123,14 +123,24 @@ def get_holdouts(
         # And the testing bed partition
         test_bed = bed.iloc[test]
         # We wiggle the bed regions the desired amount to generate
-        # the required amoount of wiggles.
-        train_bed = wiggle_bed_regions(
-            train_bed,
+        # the required amount of wiggles.
+        # We wiggle only the training positives, as wiggling the training
+        # negatives might create false negatives.
+        positives = train_bed[(train_bed.labels == 1).values]
+        # Computing the wiggles
+        wiggled_train_bed = wiggle_bed_regions(
+            positives,
             max_wiggle_size,
             wiggles,
             random_state
         )
-
+        # Concatenig the training data
+        train_bed = pd.concat([
+            wiggled_train_bed,
+            train_bed
+        ])
+        # Shuffle the training data
+        train_bed = train_bed.sample(frac=1, random_state=random_state+i)
         # And we return the computed training sequences.
         yield (
             create_sequence(train_bed, assembly, batch_size),

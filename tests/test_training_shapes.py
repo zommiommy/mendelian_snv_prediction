@@ -2,11 +2,12 @@ from mendelian_snv_prediction import get_holdouts
 
 
 def test_training_shape():
-    batch_size = 128
-    for window_size in (400, 1000):
+    batch_size = 16
+    for window_size in (50, 501):
         train, test = next(get_holdouts(
             batch_size=batch_size,
             window_size=window_size,
+            max_wiggle_size=10,
             nrows=1000,
             verbose=False
         ))

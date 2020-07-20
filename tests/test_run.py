@@ -3,11 +3,14 @@ from mendelian_snv_prediction import get_holdouts, get_model
 
 def test_run():
     """Test that the complete pipeline works."""
-    window_size = 400
+    window_size = 50
     for train, test in get_holdouts(
         holdouts=1,
+        max_wiggle_size=10,
+        batch_size=16,
         window_size=window_size,
-        nrows=1000
+        nrows=1000,
+        verbose=False
     ):
 
         model = get_model(window_size=window_size)

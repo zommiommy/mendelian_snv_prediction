@@ -61,8 +61,8 @@ setup(
     tests_require=test_deps,
     # Add here the package dependencies
     install_requires=[
-        "keras_bed_sequence",
-        "ucsc_genomes_downloader",
+        "keras_bed_sequence>=1.1.5",
+        "ucsc_genomes_downloader>=1.1.24",
         "sklearn"
     ],
     extras_require=extras,
