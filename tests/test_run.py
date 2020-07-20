@@ -1,29 +1,21 @@
-
-import os
-from mendelian_snv_prediction import get_data, get_model
+from mendelian_snv_prediction import get_holdouts, get_model
 
 
 def test_run():
-    pwd = os.path.dirname(os.path.abspath(__file__))
+    """Test that the complete pipeline works."""
+    window_size = 500
+    for train, test in get_holdouts(
+        holdouts=1,
+        window_size=window_size,
+        nrows=1000
+    ):
 
-    train, test = get_data(
-        pwd + "/../mendelian_snv.csv.gz",
-        assembly="hg19",
-        batchsize=128,
-        head_threshold=1e3,
-        seed=1337
-    )
+        model = get_model(window_size=window_size)
 
-    model = get_model()
-    model.summary()
-
-    model.fit_generator(
-        generator=train,
-        steps_per_epoch=train.steps_per_epoch,
-        validation_data=test,
-        validation_steps=test.steps_per_epoch,
-        epochs=1,
-        verbose=1,
-        use_multiprocessing=False,
-        shuffle=True
-    )
+        model.fit(
+            train,
+            steps_per_epoch=train.steps_per_epoch,
+            validation_data=test,
+            validation_steps=test.steps_per_epoch,
+            verbose=False
+        )
