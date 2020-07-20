@@ -26,7 +26,10 @@ def create_sequence(bed: pd.DataFrame, assembly: Genome, batch_size: int) -> Mix
     """
     return MixedSequence(
         x=BedSequence(assembly=assembly, bed=bed, batch_size=batch_size),
-        y=VectorSequence(bed.labels.values, batch_size=batch_size)
+        y=VectorSequence(
+            bed.labels.values.astype(float),
+            batch_size=batch_size
+        )
     )
 
 
