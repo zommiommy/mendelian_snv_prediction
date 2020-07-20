@@ -48,7 +48,8 @@ def get_model(window_size=200, balancing_loss_weigth=10):
         loss=balanced_binary_crossentropy(balancing_loss_weigth),
         metrics=[
             "binary_accuracy",
-            AUC(curve='PR')
+            AUC(curve='PR', name="auprc"),
+            AUC(curve='ROC', name="auroc"),
         ]
     )
     return classifier
