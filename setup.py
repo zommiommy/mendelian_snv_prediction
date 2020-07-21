@@ -66,7 +66,6 @@ setup(
         "sklearn",
         "plot_keras_history",
         "silence_tensorflow",
-        "tqdm",
         "IProgress"
     ],
     extras_require=extras,
