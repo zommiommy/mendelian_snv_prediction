@@ -19,14 +19,17 @@ def evaluate_sequence(model: Model, sequence: Sequence, verbose: bool):
     --------------------------------
     Dictionary with results.
     """
-    return dict(zip(
-        model.metrics_names,
-        model.evaluate_generator(
-            sequence,
-            sequence.steps_per_epoch,
-            verbose=verbose
-        ),
-    ))
+    return {
+        "model": model.name,
+        **dict(zip(
+            model.metrics_names,
+            model.evaluate_generator(
+                sequence,
+                sequence.steps_per_epoch,
+                verbose=verbose
+            ),
+        ))
+    }
 
 
 def evaluate_model(model: Model, train: Sequence, test: Sequence, verbose: bool = True):
