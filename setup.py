@@ -65,8 +65,7 @@ setup(
         "ucsc_genomes_downloader>=1.1.24",
         "sklearn",
         "plot_keras_history",
-        "silence_tensorflow",
-        "IProgress"
+        "silence_tensorflow"
     ],
     extras_require=extras,
 )
