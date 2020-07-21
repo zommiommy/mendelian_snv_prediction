@@ -38,7 +38,6 @@ def get_holdouts(
     max_wiggle_size: int = 150,
     wiggles: int = 10,
     random_state: int = 42,
-    holdouts: int = 10,
     window_size: int = 500,
     test_size: float = 0.3,
     verbose: bool = True,
@@ -58,8 +57,6 @@ def get_holdouts(
         Number of wiggles per sample.
     random_state: int = 42,
         Random state to use for reproducibility.
-    holdouts: int = 10,
-        Number of holdouts to train over.
     window_size: int = 500,
         Window size to use.
     test_size: float = 0.3,
@@ -95,8 +92,9 @@ def get_holdouts(
 
     # Load the bed file
     bed = pd.read_csv(
-        "{}/mendelian_snv.csv.gz".format(
-            os.path.dirname(os.path.abspath(__file__))
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "mendelian_snv.csv.gz"
         ),
         nrows=nrows
     )
@@ -107,24 +105,25 @@ def get_holdouts(
     # Load the genomic assembly
     assembly = Genome("hg19", verbose=False)
 
-    # Prepare the object that generates the holdout indices
-    holdouts_generator = StratifiedShuffleSplit(
-        n_splits=holdouts,
-        test_size=test_size,
-        random_state=random_state
-    )
+    # Retrieve set of unique folds
+    unique_folds = bed.folds.unique()
 
     # For each holdout
-    for i, (train, test) in tqdm(
-        enumerate(holdouts_generator.split(bed, bed.labels)),
+    for fold in tqdm(
+        unique_folds,
         desc="Holdouts",
         disable=not verbose,
-        total=holdouts
     ):
+        # Compute the folds mask
+        folds_mask = (bed.folds != fold).values
         # We get the training bed partition
-        train_bed = bed.iloc[train]
+        # In this partition, we get all the folds that do not go into the
+        # test partition.
+        train_bed = bed.iloc[folds_mask]
         # And the testing bed partition
-        test_bed = bed.iloc[test]
+        # In this partition we leave only the single fold that in this iteration
+        # of the 10-fold CV we have left out from the train.
+        test_bed = bed.iloc[~folds_mask]
         # We wiggle the bed regions the desired amount to generate
         # the required amount of wiggles.
         # We wiggle only the training positives, as wiggling the training
@@ -143,7 +142,11 @@ def get_holdouts(
             train_bed
         ])
         # Shuffle the training data
-        train_bed = train_bed.sample(frac=1, random_state=random_state+i)
+        # INFO: This shuffle should not be needed, but just for peace of mind.
+        train_bed = train_bed.sample(frac=1, random_state=random_state+fold)
+        # Shuffle the test data
+        # INFO: This shuffle should not be needed, but just for peace of mind.
+        test_bed = test_bed.sample(frac=1, random_state=random_state+fold)
         # And we return the computed training sequences.
         yield (
             create_sequence(train_bed, assembly, batch_size),

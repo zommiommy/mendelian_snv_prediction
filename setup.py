@@ -63,7 +63,9 @@ setup(
     install_requires=[
         "keras_bed_sequence>=1.1.5",
         "ucsc_genomes_downloader>=1.1.24",
-        "sklearn"
+        "sklearn",
+        "plot_keras_history",
+        "silence_tensorflow"
     ],
     extras_require=extras,
 )
